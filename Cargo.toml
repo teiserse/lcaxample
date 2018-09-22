@@ -1,0 +1,6 @@
+[package]
+name = "lcaxample"
+version = "0.1.0"
+authors = ["edvinas"]
+
+[dependencies]
