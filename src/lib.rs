@@ -1,4 +1,3 @@
-
 pub mod tree {
     #[derive(Debug)]
     pub struct BTree<T: PartialOrd> {
@@ -78,29 +77,28 @@ pub mod tree {
             holder.push('─');
             holder.push_str(&self.value.to_string());
             holder.push('\n');
+            let mut new_prefix = String::from(prefix);
+            new_prefix = new_prefix.replace("├", "│");
+            new_prefix = new_prefix.replace("└", " ");
 
             match (&self.left_child, &self.right_child) {
                 (None, None) => (),
                 (Some(l), None) => {
-                    let mut new_prefix = String::from(prefix);
                     new_prefix.push_str(" └");
                     holder.push_str(&l.construct_disp(&new_prefix));
-                },
+                }
                 (None, Some(r)) => {
-                    let mut new_prefix = String::from(prefix);
                     new_prefix.push_str(" └");
                     holder.push_str(&r.construct_disp(&new_prefix));
-                },
+                }
                 (Some(l), Some(r)) => {
-                    let mut new_prefix = String::new();
-                    new_prefix.push_str(&prefix);
                     new_prefix.push_str(" ├");
                     holder.push_str(&l.construct_disp(&new_prefix));
-                    new_prefix = String::new();
-                    new_prefix.push_str(&prefix);
+                    let newlen = new_prefix.len() - " ├".len();
+                    new_prefix.truncate(newlen);
                     new_prefix.push_str(" └");
                     holder.push_str(&r.construct_disp(&new_prefix));
-                },
+                }
             }
             holder
         }
