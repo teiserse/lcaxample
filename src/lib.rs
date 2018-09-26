@@ -111,15 +111,16 @@ mod tests {
 
     #[test]
     fn test_construction() {
-        let a: BTree<i32> = BTree::new(None);
+        //let a: BTree<i32> = BTree::new(None);
         let mut b: BTree<i32> = BTree::new(Some(5));
-        println!("{:?}\n{:?}", a, b);
+        //println!("{:?}\n{:?}", a, b);
         b.insert(3);
         b.insert(7);
         b.insert(2);
         b.insert(4);
         b.insert(6);
         b.insert(8);
-        println!("{}", b);
+        //println!("{}", b);
+        assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   ├─6\n   └─8\n");
     }
 }
