@@ -30,6 +30,8 @@ pub mod tree {
                 Some(ref mut x) => { x.insert(value); }
             }
         }
+
+        pub fn remove(&mut self, value: T) {}
     }
 
     use std::fmt;
@@ -120,7 +122,9 @@ mod tests {
         b.insert(4);
         b.insert(6);
         b.insert(8);
-        //println!("{}", b);
+        println!("{}", b);
         assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   ├─6\n   └─8\n");
+        b.remove(8);
+        assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   └─6\n");
     }
 }
