@@ -35,10 +35,10 @@ pub mod tree {
         }
 
         pub fn remove(&mut self, value: T) {
-            match self.root {
+            match self.root.take() {
                 None => {}
-                Some(ref mut x) => {
-                    x.remove(value);
+                Some(x) => {
+                    self.root = x.remove(value);
                 }
             }
         }
@@ -79,45 +79,46 @@ pub mod tree {
                 }
             }
         }
-        fn remove(&mut self, value: T) {
+        fn remove(mut self, value: T) -> Option<Box<BNode<T>>> {
             if value < self.value {
-                match self.left_child {
-                    None => {}
-                    Some(ref mut x) => {
-                        x.remove(value);
+                match self.left_child.take() {
+                    None => Some(Box::new(self)),
+                    Some(x) => {
+                        self.left_child = x.remove(value);
+                        Some(Box::new(self))
                     }
                 }
             } else if value > self.value {
-                match self.right_child {
-                    None => {}
-                    Some(ref mut x) => {
-                        x.remove(value);
+                match self.right_child.take() {
+                    None => Some(Box::new(self)),
+                    Some(x) => {
+                        self.right_child = x.remove(value);
+                        Some(Box::new(self))
                     }
                 }
             } else {
-                if self.left_child.is_some() && self.right_child.is_none() {
-                    let left_child = self.left_child.take();
-                    mem::replace(self, *left_child.unwrap());
-                } else if self.left_child.is_none() && self.right_child.is_some() {
-                    let right_child = self.right_child.take();
-                    mem::replace(self, *right_child.unwrap());
-                } //else if self.left_child.is_some() && self.right_child.is_some() {
-                //let mut predecessor = *self.left_child.unwrap();
-                //while predecessor.right_child.is_some() {
-                //    predecessor = *predecessor.right_child.unwrap();
-                //}
-                //self.remove(predecessor.value);
-                //predecessor.left_child = self.left_child;
-                //predecessor.right_child = self.right_child;
-                //mem::replace(self, predecessor);
-                //}
+                match (self.left_child.take(), self.right_child.take()) {
+                    (None, None) => { None }
+                    (Some(l), None) => { Some(l) }
+                    (None, Some(r)) => { Some(r) }
+                    (Some(mut l), Some(r)) => {
+                        l.replace_with_successor(&mut self.value);
+                        self.left_child = l.remove(value);
+                        self.right_child = Some(r);
+                        Some(Box::new(self))
+                    }
+                }
             }
-
-            //let left_child = self.left_child.take();
-            //mem::replace(self, *left_child.unwrap());
         }
 
-        pub fn lca(&self, val1: T, _val2: T) -> Option<T> {
+        fn replace_with_successor(&mut self, value: &mut T) {
+            match self.right_child {
+                Some(ref mut node) => node.replace_with_successor(value),
+                None => mem::swap(&mut self.value, value),
+            }
+        }
+
+        fn lca(&self, val1: T, _val2: T) -> Option<T> {
             Some(val1)
         }
     }
@@ -177,8 +178,10 @@ mod tests {
         b.insert(8);
         //println!("{}", b);
         assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   ├─6\n   └─8\n");
-        //b.remove(8);
-        //assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   └─6\n");
+        b.remove(8);
+        assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   └─6\n");
+        b.remove(3);
+        assert_eq!(b.to_string(), "─5\n ├─2\n │ └─4\n └─7\n   └─6\n");
     }
 
     #[test]
