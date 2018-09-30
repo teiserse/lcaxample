@@ -4,6 +4,8 @@ pub mod tree {
         root: Option<Box<BNode<T>>>,
     }
 
+    use std::mem;
+
     impl<T: PartialOrd> BTree<T> {
         pub fn new(new: Option<T>) -> BTree<T> {
             match new {
@@ -25,13 +27,20 @@ pub mod tree {
                         value,
                         left_child: None,
                         right_child: None,
-                    }))
+                    }));
                 }
                 Some(ref mut x) => { x.insert(value); }
             }
         }
 
-        pub fn remove(&mut self, value: T) {}
+        pub fn remove(&mut self, value: T) {
+            match self.root {
+                None => {}
+                Some(ref mut x) => {
+                    x.remove(value);
+                }
+            }
+        }
     }
 
     use std::fmt;
@@ -66,6 +75,43 @@ pub mod tree {
                     *current_node = boxed_node;
                 }
             }
+        }
+        fn remove(&mut self, value: T) {
+            if value < self.value {
+                match self.left_child {
+                    None => {}
+                    Some(ref mut x) => {
+                        x.remove(value);
+                    }
+                }
+            } else if value > self.value {
+                match self.right_child {
+                    None => {}
+                    Some(ref mut x) => {
+                        x.remove(value);
+                    }
+                }
+            } else {
+                if self.left_child.is_some() && self.right_child.is_none() {
+                    let left_child = self.left_child.take();
+                    mem::replace(self, *left_child.unwrap());
+                } else if self.left_child.is_none() && self.right_child.is_some() {
+                    let right_child = self.right_child.take();
+                    mem::replace(self, *right_child.unwrap());
+                } //else if self.left_child.is_some() && self.right_child.is_some() {
+                //let mut predecessor = *self.left_child.unwrap();
+                //while predecessor.right_child.is_some() {
+                //    predecessor = *predecessor.right_child.unwrap();
+                //}
+                //self.remove(predecessor.value);
+                //predecessor.left_child = self.left_child;
+                //predecessor.right_child = self.right_child;
+                //mem::replace(self, predecessor);
+                //}
+            }
+
+            //let left_child = self.left_child.take();
+            //mem::replace(self, *left_child.unwrap());
         }
     }
 
