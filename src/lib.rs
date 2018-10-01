@@ -88,7 +88,7 @@ pub mod tree {
             }
         }
         fn remove(mut self, value: T) -> Option<Box<BNode<T>>> {
-            match value.cmp(self.left_child) {
+            match value.cmp(&self.value) {
                 Ordering::Less => {
                     match self.left_child.take() {
                         None => Some(Box::new(self)),
@@ -98,7 +98,7 @@ pub mod tree {
                         }
                     }
                 }
-                Ordering::More => {
+                Ordering::Greater => {
                     match self.right_child.take() {
                         None => Some(Box::new(self)),
                         Some(x) => {
