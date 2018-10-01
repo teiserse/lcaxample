@@ -46,6 +46,10 @@ pub mod tree {
         pub fn lca(&self, val1: T, _val2: T) -> Option<T> {
             Some(val1)
         }
+
+        pub fn contains(&self, value: &T) -> bool {
+            true
+        }
     }
 
     impl<T: PartialOrd + fmt::Display> fmt::Display for BTree<T> {
@@ -121,6 +125,10 @@ pub mod tree {
         fn lca(&self, val1: T, _val2: T) -> Option<T> {
             Some(val1)
         }
+
+        fn contains(&self, value: &T) -> bool {
+            true
+        }
     }
 
 
@@ -176,7 +184,7 @@ mod tests {
         b.insert(4);
         b.insert(6);
         b.insert(8);
-        //println!("{}", b);
+        println!("{}", b);
         assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   ├─6\n   └─8\n");
         b.remove(8);
         assert_eq!(b.to_string(), "─5\n ├─3\n │ ├─2\n │ └─4\n └─7\n   └─6\n");
@@ -193,6 +201,8 @@ mod tests {
         b.insert(4);
         b.insert(6);
         b.insert(8);
+        assert_eq!(b.contains(&3), true);
+        assert_eq!(b.contains(&9), false);
         assert_eq!(b.lca(2, 7), Some(5));
         assert_eq!(b.lca(3, 4), Some(3));
         assert_eq!(b.lca(1, 5), None);
