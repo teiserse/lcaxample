@@ -44,8 +44,15 @@ pub mod tree {
             }
         }
 
-        pub fn lca(&self, val1: T, _val2: T) -> Option<T> {
-            Some(val1)
+        pub fn lca(&self, val1: &T, val2: &T) -> Option<&T> {
+            match self.root {
+                None => { None }
+                Some(ref x) => {
+                    if x.contains(val1) && x.contains(val2) {
+                        x.lca(&val1, &val2)
+                    } else { None }
+                }
+            }
         }
 
         pub fn contains(&self, value: &T) -> bool {
@@ -130,25 +137,35 @@ pub mod tree {
             }
         }
 
-        fn lca(&self, val1: T, _val2: T) -> Option<T> {
-            Some(val1)
+        fn lca(&self, val1: &T, val2: &T) -> Option<&T> {
+            if self.value > *val1 && self.value > *val2 {
+                match self.left_child {
+                    None => { None }
+                    Some(ref x) => { x.lca(val1, val2) }
+                }
+            } else if self.value < *val1 && self.value < *val2 {
+                match self.right_child {
+                    None => { None }
+                    Some(ref x) => { x.lca(val1, val2) }
+                }
+            } else { Some(&self.value) }
         }
 
         fn contains(&self, value: &T) -> bool {
-            match value.cmp( &self.value) {
+            match value.cmp(&self.value) {
                 Ordering::Equal => {
                     true
                 }
                 Ordering::Less => {
                     match self.left_child {
-                        None => {false}
-                        Some(ref x) => {x.contains(value)}
+                        None => { false }
+                        Some(ref x) => { x.contains(value) }
                     }
                 }
                 Ordering::Greater => {
                     match self.right_child {
-                        None => {false}
-                        Some(ref x) => {x.contains(value)}
+                        None => { false }
+                        Some(ref x) => { x.contains(value) }
                     }
                 }
             }
@@ -238,8 +255,8 @@ mod tests {
         b.insert(4);
         b.insert(6);
         b.insert(8);
-        assert_eq!(b.lca(2, 7), Some(5));
-        assert_eq!(b.lca(3, 4), Some(3));
-        assert_eq!(b.lca(1, 5), None);
+        assert_eq!(b.lca(&2, &7), Some(&5));
+        assert_eq!(b.lca(&3, &4), Some(&3));
+        assert_eq!(b.lca(&1, &5), None);
     }
 }
