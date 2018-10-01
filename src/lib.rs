@@ -1,13 +1,14 @@
 pub mod tree {
     #[derive(Debug)]
-    pub struct BTree<T: PartialOrd> {
+    pub struct BTree<T: Ord> {
         root: Option<Box<BNode<T>>>,
     }
 
     use std::fmt;
     use std::mem;
+    use std::cmp::Ordering;
 
-    impl<T: PartialOrd> BTree<T> {
+    impl<T: Ord> BTree<T> {
         pub fn new(new: Option<T>) -> BTree<T> {
             match new {
                 None => BTree { root: None },
@@ -48,11 +49,14 @@ pub mod tree {
         }
 
         pub fn contains(&self, value: &T) -> bool {
-            true
+            match self.root {
+                None => { false }
+                Some(ref x) => { x.contains(value) }
+            }
         }
     }
 
-    impl<T: PartialOrd + fmt::Display> fmt::Display for BTree<T> {
+    impl<T: Ord + fmt::Display> fmt::Display for BTree<T> {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             match self.root {
                 None => write!(f, "()"),
@@ -62,13 +66,13 @@ pub mod tree {
     }
 
     #[derive(Debug)]
-    struct BNode<T: PartialOrd> {
+    struct BNode<T: Ord> {
         value: T,
         left_child: Option<Box<BNode<T>>>,
         right_child: Option<Box<BNode<T>>>,
     }
 
-    impl<T: PartialOrd> BNode<T> {
+    impl<T: Ord> BNode<T> {
         fn insert(&mut self, value: T) {
             if self.value == value {
                 return;
@@ -84,32 +88,36 @@ pub mod tree {
             }
         }
         fn remove(mut self, value: T) -> Option<Box<BNode<T>>> {
-            if value < self.value {
-                match self.left_child.take() {
-                    None => Some(Box::new(self)),
-                    Some(x) => {
-                        self.left_child = x.remove(value);
-                        Some(Box::new(self))
+            match value.cmp(self.left_child) {
+                Ordering::Less => {
+                    match self.left_child.take() {
+                        None => Some(Box::new(self)),
+                        Some(x) => {
+                            self.left_child = x.remove(value);
+                            Some(Box::new(self))
+                        }
                     }
                 }
-            } else if value > self.value {
-                match self.right_child.take() {
-                    None => Some(Box::new(self)),
-                    Some(x) => {
-                        self.right_child = x.remove(value);
-                        Some(Box::new(self))
+                Ordering::More => {
+                    match self.right_child.take() {
+                        None => Some(Box::new(self)),
+                        Some(x) => {
+                            self.right_child = x.remove(value);
+                            Some(Box::new(self))
+                        }
                     }
                 }
-            } else {
-                match (self.left_child.take(), self.right_child.take()) {
-                    (None, None) => { None }
-                    (Some(l), None) => { Some(l) }
-                    (None, Some(r)) => { Some(r) }
-                    (Some(mut l), Some(r)) => {
-                        l.replace_with_successor(&mut self.value);
-                        self.left_child = l.remove(value);
-                        self.right_child = Some(r);
-                        Some(Box::new(self))
+                Ordering::Equal => {
+                    match (self.left_child.take(), self.right_child.take()) {
+                        (None, None) => { None }
+                        (Some(l), None) => { Some(l) }
+                        (None, Some(r)) => { Some(r) }
+                        (Some(mut l), Some(r)) => {
+                            l.replace_with_successor(&mut self.value);
+                            self.left_child = l.remove(value);
+                            self.right_child = Some(r);
+                            Some(Box::new(self))
+                        }
                     }
                 }
             }
@@ -134,7 +142,7 @@ pub mod tree {
 
     //  ├ │ ─ └
 
-    impl<T: PartialOrd + fmt::Display> BNode<T> {
+    impl<T: Ord + fmt::Display> BNode<T> {
         fn construct_disp(&self, prefix: &str) -> String {
             let mut holder = String::new();
             holder.push_str(&prefix);
