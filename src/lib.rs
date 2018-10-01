@@ -135,7 +135,23 @@ pub mod tree {
         }
 
         fn contains(&self, value: &T) -> bool {
-            true
+            match value.cmp( &self.value) {
+                Ordering::Equal => {
+                    true
+                }
+                Ordering::Less => {
+                    match self.left_child {
+                        None => {false}
+                        Some(ref x) => {x.contains(value)}
+                    }
+                }
+                Ordering::Greater => {
+                    match self.right_child {
+                        None => {false}
+                        Some(ref x) => {x.contains(value)}
+                    }
+                }
+            }
         }
     }
 
@@ -201,7 +217,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lca() {
+    fn test_contains() {
         let mut b: BTree<i32> = BTree::new(Some(5));
         b.insert(3);
         b.insert(7);
@@ -211,6 +227,17 @@ mod tests {
         b.insert(8);
         assert_eq!(b.contains(&3), true);
         assert_eq!(b.contains(&9), false);
+    }
+
+    #[test]
+    fn test_lca() {
+        let mut b: BTree<i32> = BTree::new(Some(5));
+        b.insert(3);
+        b.insert(7);
+        b.insert(2);
+        b.insert(4);
+        b.insert(6);
+        b.insert(8);
         assert_eq!(b.lca(2, 7), Some(5));
         assert_eq!(b.lca(3, 4), Some(3));
         assert_eq!(b.lca(1, 5), None);
