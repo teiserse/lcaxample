@@ -1,3 +1,5 @@
+pub mod dag;
+
 pub mod tree {
     #[derive(Debug)]
     pub struct BTree<T: Ord> {
