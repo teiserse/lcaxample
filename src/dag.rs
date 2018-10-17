@@ -16,6 +16,14 @@ impl<T:Eq> DAG<T> {
             })
         }
     }
+
+    pub fn find(&self, value: &T) -> Option<&T> {
+        if T == self.root.value {
+            Some(&self.root)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -23,6 +31,10 @@ struct DAGNode<T: Eq> {
     value: T,
     children: Vec<Rc<DAGNode<T>>>,
     parents: Vec<Rc<DAGNode<T>>>,
+}
+
+impl<T:Eq> DAGNode<T> {
+
 }
 
 #[cfg(test)]
