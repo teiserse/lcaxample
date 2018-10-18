@@ -9,11 +9,11 @@ impl<T: Eq> DAG<T> {
         let mut new_dag = DAG {
             structure: Vec::new()
         };
-        new_dag.structure[0] = DAGNode{
+        new_dag.structure.push(DAGNode{
             value,
             children: Vec::new(),
             parents: Vec::new(),
-        };
+        });
         new_dag
     }
 
