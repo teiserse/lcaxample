@@ -1,53 +1,45 @@
-use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct DAG<T: Eq> {
-    root: Rc<DAGNode<T>>,
+struct DAG<T: Eq> {
+    structure: Vec<DAGNode<T>>,
 }
 
 impl<T: Eq> DAG<T> {
     pub fn new(value: T) -> DAG<T> {
-        DAG {
-            root: Rc::new(DAGNode {
-                value,
-                children: Vec::new(),
-                parents: Vec::new(),
-            })
-        }
+        let mut new_dag = DAG {
+            structure: Vec::new()
+        };
+        new_dag.structure.push(DAGNode{
+            value,
+            children: Vec::new(),
+            parents: Vec::new(),
+        });
+        new_dag
     }
 
     pub fn find<>(&self, value: &T) -> Option<&T> {
-        let node = self.root.find(value);
-        match node {
-            None => None,
-            Some(loc) => Some(&loc.value)
-        }
+        None
+    }
+
+    pub fn add_new(&mut self, _parent: &T, _value: T) {
+
     }
 }
 
 #[derive(Debug)]
 struct DAGNode<T: Eq> {
     value: T,
-    children: Vec<Rc<DAGNode<T>>>,
-    parents: Vec<Rc<DAGNode<T>>>,
+    children: Vec<usize>,
+    parents: Vec<usize>,
 }
 
 impl<T: Eq> DAGNode<T> {
-    fn find(&self, value: &T) -> Option<&Rc<DAGNode<T>>> {
-        let mut current = None;
-        for child in &self.children {
-            if child.value == *value {
-                current = Some(child);
-            } else {
-                match current {
-                    Some(_) => (),
-                    None => {
-                        current = child.find(value);
-                    }
-                }
-            }
-        }
-        current
+    fn find(&self, value: &T) -> Option<&DAGNode<T>> {
+        None
+    }
+
+    fn add_new(&mut self, parent: &T, value: T) {
+
     }
 }
 
