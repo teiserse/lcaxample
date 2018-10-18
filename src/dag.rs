@@ -28,9 +28,21 @@ impl<T: Eq> DAG<T> {
         }
     }
 
-    //pub fn add_new(&mut self, _parent: &T, _value: T) {
-
-    //}
+    pub fn add_new(&mut self, parent: &T, value: T) {
+        let node_from = self.structure[0].find(self,parent);
+        match node_from {
+            Some(from) => {
+                let location = self.structure.len();
+                self.structure.push(DAGNode{
+                    value,
+                    children: Vec::new(),
+                    parents: Vec::new(),
+                });
+                from.children.push(location);
+            }
+            None => (),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -43,7 +55,7 @@ struct DAGNode<T: Eq> {
 impl<T: Eq> DAGNode<T> {
     fn find<'a>(&'a self, holder :&'a DAG<T>, value: &T) -> Option<&'a DAGNode<T>> {
         if self.value == *value {
-            Some(&self)
+            Some(self)
         } else {
             let mut ret = None;
             for i_child in &self.children {
@@ -57,10 +69,6 @@ impl<T: Eq> DAGNode<T> {
             ret
         }
     }
-
-    //fn add_new(&mut self, parent: &T, value: T) {
-
-    //}
 }
 
 #[cfg(test)]
