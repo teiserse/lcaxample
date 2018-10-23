@@ -21,24 +21,26 @@ impl<T: Eq> DAG<T> {
         if self.structure[0].value == *value {
             Some(&self.structure[0].value)
         } else {
-            match self.structure[0].find(self,value) {
+            match self.structure[0].find(self,0,value) {
                 None => None,
-                Some(node) => Some(&node.value)
+                Some(idx) => Some(&self.structure[idx].value)
             }
         }
     }
 
     pub fn add_new(&mut self, parent: &T, value: T) {
-        let node_from = self.structure[0].find(self,parent);
+        let node_from = self.structure[0].find(self,0,parent);
         match node_from {
             Some(from) => {
                 let location = self.structure.len();
-                self.structure.push(DAGNode{
+                let mut new_node = DAGNode{
                     value,
                     children: Vec::new(),
                     parents: Vec::new(),
-                });
-                from.children.push(location);
+                };
+                new_node.parents.push(from);
+                self.structure.push(new_node);
+                self.structure[from].children.push(location);
             }
             None => (),
         }
@@ -53,15 +55,15 @@ struct DAGNode<T: Eq> {
 }
 
 impl<T: Eq> DAGNode<T> {
-    fn find<'a>(&'a self, holder :&'a DAG<T>, value: &T) -> Option<&'a DAGNode<T>> {
+    fn find(&self, holder :&DAG<T>, self_idx: usize, value: &T) -> Option<usize> {
         if self.value == *value {
-            Some(self)
+            Some(self_idx)
         } else {
             let mut ret = None;
-            for i_child in &self.children {
+            for &i_child in &self.children {
                 match ret {
                     None => {
-                        ret = holder.structure[*i_child].find(holder,value);
+                        ret = holder.structure[i_child].find(holder,i_child,value);
                     },
                     Some(_) => break,
                 }
@@ -77,7 +79,11 @@ mod tests {
 
     #[test]
     fn test_construction() {
-        let a = DAG::new(30);
+        let mut a = DAG::new(30);
+        println!("{:?}", a);
+        a.add_new(&30, 5);
+        a.add_new(&30, 10);
+        a.add_new(&5, 15);
         println!("{:?}", a);
     }
 }
