@@ -29,6 +29,9 @@ impl<T: Eq> DAG<T> {
     }
 
     pub fn add_new(&mut self, parent: &T, value: T) {
+        if self.find(&value).is_some() {
+            return;
+        }
         let node_from = self.structure[0].find(self,0,parent);
         match node_from {
             Some(from) => {
@@ -44,6 +47,23 @@ impl<T: Eq> DAG<T> {
             }
             None => (),
         }
+    }
+
+    pub fn add_link(&mut self, parent: &T, child: &T) {
+        if *parent == *child {return;}
+        let from = match self.structure[0].find(self,0,parent) {
+            Some(index) => {index},
+            None => {return;}
+        };
+        let to = match self.structure[0].find(self,0,child) {
+            Some(index) => {index},
+            None => {return;}
+        };
+        if self.structure[to].find(self,to,parent).is_some() {
+            panic!("DAG attempted to link into a cycle.");
+        };
+        self.structure[from].children.push(to);
+        self.structure[to].parents.push(from);
     }
 }
 
@@ -85,5 +105,18 @@ mod tests {
         a.add_new(&30, 10);
         a.add_new(&5, 15);
         println!("{:?}", a);
+        a.add_link(&10, &15);
+        println!("{:?}", a);
+    }
+
+    #[test]
+    #[should_panic(expected = "DAG attempted to link into a cycle.")]
+    fn test_acyclic() {
+        // this test is designed to fail and should fail, as success creates an invalid situation
+        let mut b = DAG::new(1);
+        b.add_new(&1, 2);
+        b.add_new(&2, 3);
+        b.add_new(&3, 4);
+        b.add_link(&4, &2);
     }
 }
